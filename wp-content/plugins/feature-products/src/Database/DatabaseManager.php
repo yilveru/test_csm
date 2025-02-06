@@ -32,6 +32,9 @@ class DatabaseManager {
 
         if (!empty($filter)) {
             foreach ($filter as $key => $value) {
+                if ($key === 'limit') {
+                    continue;
+                }
                 $where[] = "{$key} = %s";
                 $params[] = $value;
             }
@@ -40,6 +43,11 @@ class DatabaseManager {
         $sql = "SELECT * FROM {$this->table_name}";
         if (!empty($where)) {
             $sql .= " WHERE " . implode(" AND ", $where);
+        }
+
+        if (isset($filter['limit']) && is_numeric($filter['limit'])) {
+            $sql .= " LIMIT %d";
+            $params[] = (int) $filter['limit'];
         }
 
         return $this->wpdb->get_results($this->wpdb->prepare($sql, ...$params));
